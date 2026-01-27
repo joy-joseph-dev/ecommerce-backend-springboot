@@ -4,7 +4,7 @@ import com.joy_joseph.ecommerce_backend.Model.Cart;
 import com.joy_joseph.ecommerce_backend.Service.CartService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+@CrossOrigin(origins = "http://localhost:5173/")
 @RestController
 @RequestMapping("/cart")
 public class CartController {

@@ -9,6 +9,7 @@ import com.joy_joseph.ecommerce_backend.Repository.CartRepository;
 import com.joy_joseph.ecommerce_backend.Repository.ProductRepo;
 import com.joy_joseph.ecommerce_backend.Repository.UserRepository;
 import com.joy_joseph.ecommerce_backend.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +17,10 @@ import java.util.List;
 @Service
 public class CartService {
 
-    private  UserRepository userRepository;
-    private  ProductRepo productRepository;
-    private  CartRepository cartRepository;
-    private  CartItemRepository cartItemRepository;
+    private UserRepository userRepository;
+    private ProductRepo productRepository;
+    private CartRepository cartRepository;
+    private CartItemRepository cartItemRepository;
 
     public CartService(UserRepository userRepository,
                        ProductRepo productRepository,
@@ -82,45 +83,46 @@ public class CartService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         Cart cart = cartRepository.findByUser(user);
-        if(cart == null){
+        if (cart == null) {
             return null;
         }
-        List<CartItem>cartItem = cartItemRepository.findByCart(cart);
+        List<CartItem> cartItem = cartItemRepository.findByCart(cart);
 
         return cart;
     }
 
     public Cart updateCartItem(long cartItemId, int quantity) {
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() ->
-                            new ResourceNotFoundException("items not found"));
+                new ResourceNotFoundException("items not found"));
         Cart cart = cartItem.getCart();
-        if(quantity==0){
+        if (quantity == 0) {
             cartItemRepository.delete(cartItem);
-        }
-        else{
+        } else {
             cartItem.setQuantity(quantity);
-            cartItem.setPrice(quantity*cartItem.getProduct().getPrice());
+            cartItem.setPrice(quantity * cartItem.getProduct().getPrice());
             cartItemRepository.save(cartItem);
         }
         int total = cartItemRepository.findByCart(cart)
-                                      .stream()
-                                      .mapToInt(CartItem ::getPrice).sum();
-                cart.setTotalPrice(total);
-                return cartRepository.save(cart);
-    }
-
-    public Cart removeItemFromCart(long cartItemId) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() ->
-                            new ResourceNotFoundException("item not found"));
-        Cart cart = cartItem.getCart();
-        cartItemRepository.delete(cartItem);
-        int total = cartItemRepository.findByCart(cart)
                 .stream()
-                .mapToInt(CartItem :: getPrice)
-                .sum();
+                .mapToInt(CartItem::getPrice).sum();
         cart.setTotalPrice(total);
         return cartRepository.save(cart);
     }
+
+    @Transactional
+    public Cart removeItemFromCart(Long cartItemId) {
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
+
+        Cart cart = cartItem.getCart();
+        cart.getItems().remove(cartItem);
+        cart.setTotalPrice(cart.getTotalPrice() - cartItem.getPrice());
+        cartRepository.save(cart);
+        cartItemRepository.delete(cartItem);
+        return cart;
+    }
 }
+
 
 

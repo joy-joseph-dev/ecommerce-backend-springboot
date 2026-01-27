@@ -3,11 +3,12 @@ package com.joy_joseph.ecommerce_backend.Model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+
 @Entity
 @Table(name="orders")
 @Data
@@ -20,6 +21,9 @@ public class Order {
     @ManyToOne
      private User user;
      private BigDecimal totalAmount;
-     String status ;
+     private String status ;
+
      private Date createdAt;
+
+
 }

@@ -1,3 +1,4 @@
+
 package com.joy_joseph.ecommerce_backend.Service;
 
 import com.joy_joseph.ecommerce_backend.Model.Cart;
@@ -16,10 +17,10 @@ import java.util.List;
 @Service
 public class OrderService {
 
-            private UserRepository userRepository;
-            private CartRepository cartRepository;
-            private OrderRepository orderRepository;
-            private CartItemRepository cartItemRepository;
+    private UserRepository userRepository;
+    private CartRepository cartRepository;
+    private OrderRepository orderRepository;
+    private CartItemRepository cartItemRepository;
 
 
     public OrderService(UserRepository userRepository, CartRepository cartRepository,
@@ -55,7 +56,7 @@ public class OrderService {
 
         //save order
         Order saveOrder = orderRepository.save(order);
-
+        cart.getItems().clear();
         //clear cart
         cartItemRepository.deleteByCart(cart);
         cart.setTotalPrice(0);
@@ -65,8 +66,7 @@ public class OrderService {
     }
 
     public List<Order> getOrdersOfUser(long userId) {
-       User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-       return orderRepository.findByUser(user);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return orderRepository.findByUser(user);
     }
 }
-
